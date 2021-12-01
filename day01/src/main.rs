@@ -2,9 +2,6 @@ use std::fs;
 
 fn main() {
     let filename = String::from("/mnt/s/AdventOfCode/2021/day01/input01.txt");
-
-    // println!("Input:\n{}", contents);
-    //
     let lines: Vec<u32> = load_file(&filename);
     
     part1(&lines);
@@ -29,7 +26,6 @@ fn part1(lines: &Vec<u32>) {
     }
 
     println!("Descended {} times!", descents);
-    
 }
 
 fn part2(lines: &Vec<u32>) {
@@ -42,7 +38,6 @@ fn part2(lines: &Vec<u32>) {
     let mut descents: u32 = 0;
 
     for depth in lines {
-
         // If three values exist, then look for deeper water
         if index >= 3 {
             if *depth > depths[index.rem_euclid(3)] {
