@@ -22,10 +22,8 @@ fn part1(lines: &Vec<String>) {
     let mut descents: i32 = 0;
 
     for line in lines {
-        println!("Depth: {}", line);
         let depth: i32 = line.parse().expect("Invalid i32 value");
         if depth > previous_depth {
-            println!("Descending!");
             descents += 1;
         }
         previous_depth = depth;
@@ -54,7 +52,6 @@ fn part2(lines: &Vec<String>) {
             let depth_sum = depths[0] + depths[1] + depths[2];
             if depth_sum > previous_depth {
                 descents += 1;
-                println!("Descending!");
             }
             previous_depth = depth_sum;
         }
