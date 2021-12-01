@@ -7,6 +7,16 @@ fn main() {
     //
     let lines: Vec<String> = load_file(&filename);
     
+    part1(&lines);
+}
+
+fn load_file(filename: &String) -> Vec<String> {
+    let contents = fs::read_to_string(filename).expect("Error reading file!");
+    let lines: Vec<String> = contents.trim().split('\n').map(|s| s.trim()).map(|s| String::from(s)).collect();
+    lines
+}
+
+fn part1(lines: &Vec<String>) {
     let mut previous_depth: i32 = i32::MAX;
     let mut descents: i32 = 0;
 
@@ -22,10 +32,4 @@ fn main() {
 
     println!("Descended {} times!", descents);
     
-}
-
-fn load_file(filename: &String) -> Vec<String> {
-    let contents = fs::read_to_string(filename).expect("Error reading file!");
-    let lines: Vec<String> = contents.trim().split('\n').map(|s| s.trim()).map(|s| String::from(s)).collect();
-    lines
 }
