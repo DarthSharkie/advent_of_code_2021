@@ -19,7 +19,7 @@ fn main() {
     let filename = String::from("input02.txt");
     let contents = fs::read_to_string(filename).expect("Error reading file!");
 
-    let moves: Vec<Move> = contents.trim().lines().map(|s| Move::from_str(s).unwrap()).collect();
+    let moves: Vec<Move> = contents.trim().lines().map(|s| s.parse().unwrap()).collect();
 
     part1(&moves);
     part2(&moves);
