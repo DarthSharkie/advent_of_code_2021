@@ -21,6 +21,11 @@ fn main() {
 
     let moves: Vec<Move> = contents.trim().lines().map(|s| Move::from_str(s).unwrap()).collect();
 
+    part1(&moves);
+    part2(&moves);
+}
+
+fn part1(moves: &Vec<Move>) {
     let mut x: i32 = 0;
     let mut y: i32 = 0;
     for mv in moves {
@@ -28,6 +33,24 @@ fn main() {
             "forward" => x += mv.distance,
             "up" => y -= mv.distance,
             "down" => y += mv.distance,
+            _ => println!("Bad input!"),
+        }
+    }
+    println!("x: {}, y: {}, x*y: {}", x, y, x*y);
+}
+
+fn part2(moves: &Vec<Move>) {
+    let mut x: i32 = 0;
+    let mut y: i32 = 0;
+    let mut aim: i32 = 0;
+    for mv in moves {
+        match mv.direction.as_str() {
+            "forward" => {
+                x += mv.distance;
+                y += (aim * mv.distance);
+            },
+            "up" => aim -= mv.distance,
+            "down" => aim += mv.distance,
             _ => println!("Bad input!"),
         }
     }
