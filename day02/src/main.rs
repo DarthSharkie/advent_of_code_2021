@@ -16,7 +16,7 @@ impl FromStr for Move {
 }
 
 fn main() {
-    let filename = String::from("/mnt/s/AdventOfCode/2021/input02.txt");
+    let filename = String::from("input02.txt");
     let contents = fs::read_to_string(filename).expect("Error reading file!");
 
     let moves: Vec<Move> = contents.trim().lines().map(|s| Move::from_str(s).unwrap()).collect();
@@ -25,7 +25,7 @@ fn main() {
     part2(&moves);
 }
 
-fn part1(moves: &Vec<Move>) {
+fn part1(moves: &[Move]) {
     let mut x: i32 = 0;
     let mut y: i32 = 0;
     for mv in moves {
@@ -33,13 +33,13 @@ fn part1(moves: &Vec<Move>) {
             "forward" => x += mv.distance,
             "up" => y -= mv.distance,
             "down" => y += mv.distance,
-            _ => println!("Bad input!"),
+            _ => (),
         }
     }
     println!("x: {}, y: {}, x*y: {}", x, y, x*y);
 }
 
-fn part2(moves: &Vec<Move>) {
+fn part2(moves: &[Move]) {
     let mut x: i32 = 0;
     let mut y: i32 = 0;
     let mut aim: i32 = 0;
@@ -47,11 +47,11 @@ fn part2(moves: &Vec<Move>) {
         match mv.direction.as_str() {
             "forward" => {
                 x += mv.distance;
-                y += (aim * mv.distance);
+                y += aim * mv.distance;
             },
             "up" => aim -= mv.distance,
             "down" => aim += mv.distance,
-            _ => println!("Bad input!"),
+            _ => (),
         }
     }
     println!("x: {}, y: {}, x*y: {}", x, y, x*y);
