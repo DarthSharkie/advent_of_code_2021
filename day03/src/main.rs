@@ -53,6 +53,6 @@ fn part2(readings: &[u32]) {
 }
 
 fn str_to_u32(bits: &str) -> u32 {
-    bits.bytes().fold(0, |acc, b| acc * 2 + (b as u32) - (b'0' as u32))
+    bits.bytes().fold(0, |acc, b| acc * 2 + (b - b'0') as u32)
 }
 
