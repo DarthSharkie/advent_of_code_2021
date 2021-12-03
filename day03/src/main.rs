@@ -50,6 +50,38 @@ fn part1(readings: &[u32]) {
 }
 
 fn part2(readings: &[u32]) {
+    let mut o2: Vec<u32> = readings.to_vec();
+
+    for bit in (0..=MSB).rev() {
+        let (ones, zeros): (Vec<u32>, Vec<u32>) = o2.iter().partition(|&o| o | 2u32.pow(bit) == *o);
+        println!("Values: {}, Ones: {}, Zeros: {}", o2.len(), ones.len(), zeros.len());
+        if ones.len() >= zeros.len() {
+            o2 = ones;
+        } else {
+            o2 = zeros;
+        }
+        if o2.len() == 1 {
+            break;
+        }
+    }
+    println!("O2: {:?}", o2[0]);
+
+    let mut co2: Vec<u32> = readings.to_vec();
+    for bit in (0..=MSB).rev() {
+        let (ones, zeros): (Vec<u32>, Vec<u32>) = co2.iter().partition(|&co| co | 2u32.pow(bit) == *co);
+        println!("Values: {}, Ones: {}, Zeros: {}", co2.len(), ones.len(), zeros.len());
+        if ones.len() >= zeros.len() {
+            co2 = zeros;
+        } else {
+            co2 = ones;
+        }
+        if co2.len() == 1 {
+            break;
+        }
+        println!("CO2: {:?}", co2);
+    }
+    println!("CO2: {:?}", co2[0]);
+    println!("Life Support: {}", o2[0] * co2[0]);
 }
 
 fn str_to_u32(bits: &str) -> u32 {
