@@ -18,39 +18,41 @@ impl FromStr for Move {
 }
 */
 
+const MSB: u32 = 11;
+
 fn main() {
     let filename = String::from("input03.txt");
     let contents = fs::read_to_string(filename).expect("Error reading file!");
 
-    let readings: Vec<String> = contents.trim().lines().map(str::trim).map(String::from).collect();
+    let readings: Vec<u32> = contents.trim().lines().map(str::trim).map(|s| str_to_u32(s)).collect();
 
     part1(&readings);
     part2(&readings);
 }
 
-fn part1(readings: &[String]) {
-    let mut gamma: [usize; 12] = [0; 12];
+fn part1(readings: &[u32]) {
+    let mut gamma: [u32; 12] = [0; 12];
 
     for reading in readings {
-        let mut i: usize = 0;
-        for bit in reading.bytes() {
-            if bit == b'1' {
-                gamma[i] += 1;
+        for bit in (0..=MSB).rev() {
+            // If the bit is set
+            if reading | 2u32.pow(bit) == *reading {
+                gamma[(MSB-bit) as usize] += 1;
             }
-            i += 1;
         }
     }
-    gamma = gamma.map(|count| count >= readings.len() / 2).map(|b| b as usize);
-    let gamma_value: u32 = bits_to_u32(&gamma);
+    println!("Gamma: {:?}", gamma);
+    gamma = gamma.map(|count| count > readings.len() as u32 / 2).map(|b| b as u32);
+    let gamma_value: u32 = gamma.iter().fold(0, |acc, b| acc * 2 + b);
     let epsilon_value: u32 = 2u32.pow(12) - gamma_value - 1;
     let power = gamma_value * epsilon_value;
     println!("Power: {}", power);
 }
 
-fn part2(readings: &[String]) {
+fn part2(readings: &[u32]) {
 }
 
-fn bits_to_u32(bits: &[usize]) -> u32 {
-    bits.iter().fold(0, |acc, b| acc * 2 + b) as u32
+fn str_to_u32(bits: &str) -> u32 {
+    bits.bytes().fold(0, |acc, b| acc * 2 + (b as u32) - (b'0' as u32))
 }
 
