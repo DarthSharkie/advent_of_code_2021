@@ -82,12 +82,12 @@ fn create_map(segments: &[LineSegment], use_diag: bool) -> i32 {
             },
             Orientation::DIAGONAL(_) => {
                 if use_diag {
-					println!("Segment: {:?}", segment);
+                    println!("Segment: {:?}", segment);
                     let x_range: Box<dyn Iterator<Item=usize>> = if segment.x1 < segment.x2 { Box::new(segment.x1..=segment.x2) } else { Box::new((segment.x2..=segment.x1).rev()) };
                     let y_range: Box<dyn Iterator<Item=usize>> = if segment.y1 < segment.y2 { Box::new(segment.y1..=segment.y2) } else { Box::new((segment.y2..=segment.y1).rev()) };
                 
                     for point in x_range.zip(y_range) {
-						println!("Point: {:?}", point);
+                        println!("Point: {:?}", point);
                         points.insert(point, points.get(&point).unwrap_or(&0) + 1);
                     }
                 }
