@@ -1,69 +1,32 @@
 use std::fs;
-use std::str::FromStr;
-
-#[derive(Clone)]
-struct LanternFish {
-    timer: usize,
-}
-
-impl FromStr for LanternFish {
-    type Err = String;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(LanternFish { timer: s.parse::<usize>().unwrap() })
-    }
-}
-
-impl LanternFish {
-    fn tick(&mut self) {
-        self.timer -= 1;
-    }
-
-    fn spawns(&self) -> bool {
-        self.timer == 0
-    }
-
-    fn reset(&mut self) {
-        self.timer = 6;
-    }
-}
 
 fn main() {
-    let filename = String::from("sample.txt");
+    let filename = String::from("input06.txt");
     let contents = fs::read_to_string(filename).expect("Error reading file!");
     println!("Sample: {}", contents);
     
-    let fishes: Vec<LanternFish> = contents.trim().split(",").map(str::parse).map(Result::unwrap).collect();
+    let mut school: [usize; 9] = [0; 9];
 
-    println!("Part 1: {}", part1(&fishes, 80));
-    println!("Part 2: {}", part1(&fishes, 256));
+    for timer in contents.trim().split(",").map(str::parse::<usize>).map(Result::unwrap) {
+        school[timer] += 1;
+    }
+
+    println!("Part 1: {}", tick(&mut school.clone(), 80));
+    println!("Part 2: {}", tick(&mut school, 256));
 }
 
-fn part1(fishes: &[LanternFish], days: usize) -> usize {
-    let mut school = fishes.to_vec();
-    println!("School: {}", school.len());
+fn tick(school: &mut [usize; 9], days: usize) -> usize {
+    println!("School: {}", school.iter().sum::<usize>());
 
     for day in 0..days {
-        let mut new_school = Vec::new();
-        let mut new_fish = 0;
-        for mut fish in school {
-            if fish.spawns() {
-                new_fish += 1;         
-                fish.reset();
-            } else {
-                fish.tick();
-            }
-            new_school.push(fish);
+        let new_fish = school[0];
+        for timer in 0..8 {
+            school[timer] = school[timer + 1];
         }
-
-        school = new_school;
-        for _ in 0..new_fish {
-            school.push(LanternFish {timer: 8});
-        }
-        println!("After {:?} day, new fish {:?}, school: {:?}", day + 1, new_fish, school.len());
+        school[6] += new_fish;
+        school[8] = new_fish;
+        println!("After {:?} day, new fish {:?}, school: {:?}", day + 1, new_fish, school);
     }
-    school.len()
+    school.iter().sum::<usize>()
 }
 
-fn part2(fishes: &[LanternFish]) -> usize {
-    0
-}
