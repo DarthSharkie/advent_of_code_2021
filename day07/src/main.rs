@@ -11,28 +11,28 @@ fn parse(filename: &str) -> Vec<i32> {
 }
 
 fn part1(positions: Vec<i32>) -> i32 {
-    minimize_fuel(positions, |pos, x| i32::abs(pos - x))
+    minimize_fuel(positions, |d| d)
 }
 
 fn part2(positions: Vec<i32>) -> i32 {
-    minimize_fuel(positions, |pos, x| { let d = i32::abs(pos - x); d * (d+1) / 2})
+    minimize_fuel(positions, |d| d * (d+1) / 2)
 }
 
-fn minimize_fuel(positions: Vec<i32>, func: fn(i32, i32) -> i32) -> i32 {
+fn minimize_fuel(positions: Vec<i32>, fuel: fn(i32) -> i32) -> i32 {
     let min = positions.iter().min().unwrap();
     let max = positions.iter().max().unwrap();
-    let mut fuel = i32::MAX;
+    let mut min_fuel = i32::MAX;
     let mut best_position = 0;
 
     for pos in *min..=*max {
-        let sum = positions.iter().fold(0, |acc, x| acc + func(pos, *x));
-        if sum < fuel {
-            fuel = sum;
+        let sum = positions.iter().map(|x| fuel((pos - x).abs())).sum();
+        if sum < min_fuel {
+            min_fuel = sum;
             best_position = pos;
         }
     }
     println!("Position {} is best", best_position);
-    fuel
+    min_fuel
 }
 
 
