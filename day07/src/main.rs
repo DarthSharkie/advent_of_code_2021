@@ -15,7 +15,7 @@ fn part1(positions: Vec<i32>) -> i32 {
 }
 
 fn part2(positions: Vec<i32>) -> i32 {
-    minimize_fuel(positions, |pos, x| (0..=i32::abs(pos - x)).sum())
+    minimize_fuel(positions, |pos, x| { let d = i32::abs(pos - x); d * (d+1) / 2})
 }
 
 fn minimize_fuel(positions: Vec<i32>, func: fn(i32, i32) -> i32) -> i32 {
