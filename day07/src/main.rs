@@ -1,8 +1,8 @@
 use std::fs;
 
 fn main() {
-    println!("Part 1: {}", part1(parse("input07.txt"))); // 386536
-    println!("Part 2: {}", part2(parse("input07.txt"))); // 1732821262171
+    println!("Part 1: {}", part1(parse("input07.txt"))); // 323647
+    println!("Part 2: {}", part2(parse("input07.txt"))); // 87640209
 }
 
 fn parse(filename: &str) -> Vec<i32> {
