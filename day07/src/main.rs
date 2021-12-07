@@ -11,13 +11,21 @@ fn parse(filename: &str) -> Vec<i32> {
 }
 
 fn part1(positions: Vec<i32>) -> i32 {
+    minimize_fuel(positions, |pos, x| i32::abs(pos - x))
+}
+
+fn part2(positions: Vec<i32>) -> i32 {
+    minimize_fuel(positions, |pos, x| (0..=i32::abs(pos - x)).sum())
+}
+
+fn minimize_fuel(positions: Vec<i32>, func: fn(i32, i32) -> i32) -> i32 {
     let min = positions.iter().min().unwrap();
     let max = positions.iter().max().unwrap();
     let mut fuel = i32::MAX;
     let mut best_position = 0;
 
     for pos in *min..=*max {
-        let sum = positions.iter().fold(0, |acc, x| acc + i32::abs(pos - x));
+        let sum = positions.iter().fold(0, |acc, x| acc + func(pos, *x));
         if sum < fuel {
             fuel = sum;
             best_position = pos;
@@ -25,10 +33,6 @@ fn part1(positions: Vec<i32>) -> i32 {
     }
     println!("Position {} is best", best_position);
     fuel
-}
-
-fn part2(positions: Vec<i32>) -> i32 {
-    0
 }
 
 
@@ -39,5 +43,5 @@ fn test_part1() {
 
 #[test]
 fn test_part2() {
-    assert_eq!(part2(parse("sample.txt")), 0);
+    assert_eq!(part2(parse("sample.txt")), 168);
 }
