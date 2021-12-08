@@ -44,50 +44,41 @@ impl FromStr for Entry {
 impl Entry {
     fn decode(&self) -> i32 {
         let code = self.deduce();
-        println!("code: {:?}", code);
         self.encoded_output.iter().map(|eo| code.get(eo).expect("no mapping")).fold(0, |out, digit| out*10 + digit)
     }
 
     fn deduce(&self) -> HashMap<String, i32> {
         let encodings = [self.patterns.clone(), self.encoded_output.clone()].concat(); 
-        println!("\n{:?}", encodings);
         let mut code = HashMap::new();
 
+        // Simple identifications, only one digit with this number of segments lit
         let eight: String = encodings.iter().find(|&s| s.len() == 7).unwrap().to_string();
-        println!("Eight: {}", eight);
         let one: String = encodings.iter().find(|&s| s.len() == 2).unwrap().to_string();
-        println!("One: {}", one);
         let seven: String = encodings.iter().find(|&s| s.len() == 3).unwrap().to_string();
-        println!("Seven: {}", seven);
-        let a: char = seven.chars().find(|&c| !one.contains(c)).unwrap();
-        println!("A: {}", a);
-
         let four: String = encodings.iter().find(|&s| s.len() == 4).unwrap().to_string();
-        println!("Four: {}", four);
 
+        // Nine is the only six-segment containing all of Four
         let nine: String = encodings.iter().find(|&s| s.len() == 6 && self.contains_all(s, &four)).unwrap().to_string();
-        println!("Nine: {}", nine);
+        // G = Nine - Four - Seven
         let g: char = nine.chars().find(|&h| !four.contains(h) && !seven.contains(h)).unwrap();
-        println!("G: {}", g);
+        // E = Eight - Nine
         let e: char = eight.chars().find(|&h| !nine.contains(h)).unwrap();
-        println!("E: {}", e);
 
+        // Three is the only five-segment containing all of Seven
         let three: String = encodings.iter().find(|&s| s.len() == 5 && self.contains_all(&s, &seven)).unwrap().to_string();
-        println!("Three: {}", three);
+        // D = Three - Seven - G
         let d: char = three.chars().find(|&h| !seven.contains(h) && h != g).unwrap();
-        println!("D: {}", d);
+        // B = Nine - Three
         let b: char = nine.chars().find(|&h| !three.contains(h)).unwrap();
-        println!("B: {}", b);
 
+        // Six is the only six-segment containing the proper segments of D and E
         let six: String = encodings.iter().find(|&s| s.len() == 6 && s.contains(d) && s.contains(e)).unwrap().to_string();
-        println!("Six: {}", six);
-        let c: char = eight.chars().find(|&h| !six.contains(h)).unwrap();
-        println!("C: {}", c);
-        let f: char = one.chars().find(|&h| h != c).unwrap();
-        println!("F: {}", f);
 
+        // Zero is the only six-segment NOT containing the proper segment D
         let zero: String = encodings.iter().find(|&s| s.len() == 6 && !s.contains(d)).unwrap().to_string();
+        // Two is the only five-segment containing the proper segment E
         let two: String = encodings.iter().find(|&s| s.len() == 5 && s.contains(e)).unwrap().to_string();
+        // Five is the only five-segment containing the proper segment B
         let five: String = encodings.iter().find(|&s| s.len() == 5 && s.contains(b)).unwrap().to_string();
 
         code.insert(zero, 0);
