@@ -38,12 +38,10 @@ fn part2(floor: &Floor) -> usize {
 
     let mut basin_sizes: Vec<usize> = low_points.iter().map(|&p| find_basin(floor, p)).collect();
     basin_sizes.sort_unstable_by(|a,b| b.cmp(a));
-    println!("Basin sizes: {:?}", basin_sizes);
     basin_sizes[0] * basin_sizes[1] * basin_sizes[2]
 }
 
 fn find_basin(floor: &Floor, point: (usize, usize)) -> usize {
-    println!("Find Basin for {:?}", point);
     let mut basin: HashSet<Point> = HashSet::new();
     let mut check: VecDeque<Point> = VecDeque::new();
     
@@ -51,7 +49,6 @@ fn find_basin(floor: &Floor, point: (usize, usize)) -> usize {
     while !check.is_empty() {
         // Get point from queue
         let (y, x) = check.pop_front().unwrap();
-        println!("Checking {:?}", (y, x));
         // If 9, not in a basin
         if floor[y][x] == 9 {
             continue;
@@ -80,7 +77,6 @@ fn find_basin(floor: &Floor, point: (usize, usize)) -> usize {
             }
         }
     }
-    println!("Basin at {:?} has {} points: {:?}", point, basin.len(), basin);
     basin.len()
 }
 
