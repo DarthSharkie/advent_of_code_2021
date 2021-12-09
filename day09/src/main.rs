@@ -1,5 +1,4 @@
 use std::fs;
-use std::cmp::min;
 
 type Floor = Vec<Vec<u8>>;
 
@@ -21,13 +20,19 @@ trait LessThan {
 
 impl LessThan for u8 {
     fn less_than_all(&self, others: &Vec<u8>) -> bool {
-        println!("others: {:?}", others);
         others.iter().all(|o| self < o)
     }
 }
 
 fn part1(floor: &Floor) -> i32 {
-    let mut low_points: Vec<i32> = Vec::new();
+    let low_points: Vec<(usize, usize)> = find_low_points(floor);
+
+    low_points.iter().map(|(y,x)| (floor[*y][*x] + 1) as i32).sum()
+}
+
+
+fn find_low_points(floor: &Floor) -> Vec<(usize, usize)> {
+    let mut low_points = Vec::new();
     let height = floor.len();
     let width = floor[0].len();
     for y in 0..height {
@@ -68,11 +73,11 @@ fn part1(floor: &Floor) -> i32 {
                 }
             };
             if low {
-                low_points.push((floor[y][x] + 1) as i32);
+                low_points.push((y, x));
             }
         }
     }
-    low_points.iter().sum()
+    low_points
 }
 
 fn part2(_floor: &Floor) -> i32 {
