@@ -1,6 +1,9 @@
 use std::fs;
+use std::collections::VecDeque;
+use std::collections::HashSet;
 
 type Floor = Vec<Vec<u8>>;
+type Point = (usize, usize);
 
 fn main() {
     println!("Part 1: {}", part1(&parse("input09.txt"))); // 543
@@ -30,6 +33,56 @@ fn part1(floor: &Floor) -> i32 {
     low_points.iter().map(|(y,x)| (floor[*y][*x] + 1) as i32).sum()
 }
 
+fn part2(floor: &Floor) -> usize {
+    let low_points: Vec<(usize, usize)> = find_low_points(floor);
+
+    let mut basin_sizes: Vec<usize> = low_points.iter().map(|&p| find_basin(floor, p)).collect();
+    basin_sizes.sort_unstable_by(|a,b| b.cmp(a));
+    println!("Basin sizes: {:?}", basin_sizes);
+    basin_sizes[0] * basin_sizes[1] * basin_sizes[2]
+}
+
+fn find_basin(floor: &Floor, point: (usize, usize)) -> usize {
+    println!("Find Basin for {:?}", point);
+    let mut basin: HashSet<Point> = HashSet::new();
+    let mut check: VecDeque<Point> = VecDeque::new();
+    
+    check.push_back(point);
+    while !check.is_empty() {
+        // Get point from queue
+        let (y, x) = check.pop_front().unwrap();
+        println!("Checking {:?}", (y, x));
+        // If 9, not in a basin
+        if floor[y][x] == 9 {
+            continue;
+        }
+        // Put in basin, since it's not 9
+        basin.insert((y,x));
+        // Add four points in each cardinal direction if not already present and in floor
+        if y >= 1 {
+            if !basin.contains(&(y-1, x)) { 
+                check.push_back((y-1, x));
+            }
+        }
+        if x >= 1 {
+            if !basin.contains(&(y, x-1)) { 
+                check.push_back((y, x-1));
+            }
+        }
+        if y < floor.len() - 1 {
+            if !basin.contains(&(y+1, x)) { 
+                check.push_back((y+1, x));
+            }
+        }
+        if x < floor[0].len() - 1 {
+            if !basin.contains(&(y, x+1)) { 
+                check.push_back((y, x+1));
+            }
+        }
+    }
+    println!("Basin at {:?} has {} points: {:?}", point, basin.len(), basin);
+    basin.len()
+}
 
 fn find_low_points(floor: &Floor) -> Vec<(usize, usize)> {
     let mut low_points = Vec::new();
@@ -80,10 +133,6 @@ fn find_low_points(floor: &Floor) -> Vec<(usize, usize)> {
     low_points
 }
 
-fn part2(_floor: &Floor) -> i32 {
-    0
-}
-
 
 #[test]
 fn test_part1() {
@@ -92,5 +141,5 @@ fn test_part1() {
 
 #[test]
 fn test_part2() {
-    assert_eq!(part2(&parse("sample.txt")), 61229);
+    assert_eq!(part2(&parse("sample.txt")), 1134);
 }
