@@ -71,8 +71,64 @@ fn part1(nav: &Nav) -> i32 {
     (*counts.entry('>').or_default() * 25137) 
 }
 
-fn part2(nav: &Nav) -> i32 {
-    0
+fn part2(nav: &Nav) -> usize {
+    let mut scores: Vec<usize> = Vec::new();
+	for cmd in nav {
+        let mut stack = VecDeque::new();
+        let mut corrupted: bool = false;
+        for ins in cmd {
+            let expected = match ins {
+                '[' | '(' | '{' | '<' => { stack.push_front(ins); None },
+                '>' => if let Some('<') = stack.get(0) {
+                    stack.pop_front();
+                    None
+                } else {
+                    Some(ins)
+                },
+                '}' => if let Some('{') = stack.get(0) {
+                    stack.pop_front();
+                    None
+                } else {
+                    Some(ins)
+                },
+                ')' => if let Some('(') = stack.get(0) {
+                    stack.pop_front();
+                    None
+                } else {
+                    Some(ins)
+                },
+                ']' => if let Some('[') = stack.get(0) {
+                    stack.pop_front();
+                    None
+                } else {
+                    Some(ins)
+                },
+                _ => panic!("Shouldn't happen"),
+            };
+            match expected {
+                Some(_) => corrupted = true,
+                _ => (),
+            }
+        }
+        if stack.len() > 0 && !corrupted {
+            let mut score: usize = 0;
+            println!("Stack: {:?}", stack);
+            while !stack.is_empty() {
+                let points = match stack.pop_front() {
+                    Some('(') => 1,
+                    Some('[') => 2,
+                    Some('{') => 3,
+                    Some('<') => 4,
+                    _ => panic!("Bad!"),
+                };
+                score = score * 5 + points;
+            }
+            scores.push(score);
+        }
+	}
+    scores.sort_unstable();
+    println!("Scores: {:?}", scores);
+    scores[(scores.len()-1)/2]
 }
 
 
@@ -84,5 +140,5 @@ fn test_part1() {
 
 #[test]
 fn test_part2() {
-    assert_eq!(part2(&parse("sample.txt")), 0);
+    assert_eq!(part2(&parse("sample.txt")), 288957);
 }
