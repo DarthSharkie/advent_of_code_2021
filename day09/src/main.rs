@@ -6,8 +6,8 @@ type Floor = Vec<Vec<u8>>;
 type Point = (usize, usize);
 
 fn main() {
-    println!("Part 1: {}", part1(&parse("input09.txt"))); // 543
-    println!("Part 2: {}", part2(&parse("input09.txt"))); // 994266
+    println!("Part 1: {}", part1(&parse("input09.txt"))); // 518
+    println!("Part 2: {}", part2(&parse("input09.txt"))); // 949905
 }
 
 fn parse(filename: &str) -> Floor {
@@ -38,7 +38,7 @@ fn part2(floor: &Floor) -> usize {
 
     let mut basin_sizes: Vec<usize> = low_points.iter().map(|&p| find_basin(floor, p)).collect();
     basin_sizes.sort_unstable_by(|a,b| b.cmp(a));
-    basin_sizes[0] * basin_sizes[1] * basin_sizes[2]
+    basin_sizes.iter().take(3).product()
 }
 
 fn find_basin(floor: &Floor, point: (usize, usize)) -> usize {
