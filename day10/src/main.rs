@@ -6,8 +6,8 @@ use std::collections::HashMap;
 type Nav = Vec<Vec<char>>;
 
 fn main() {
-    println!("Part 1: {}", part1(&parse("input10.txt"))); // 518
-    println!("Part 2: {}", part2(&parse("input10.txt"))); // 949905
+    println!("Part 1: {}", part1(&parse("input10.txt"))); // 290691
+    println!("Part 2: {}", part2(&parse("input10.txt"))); // 2768166558
 }
 
 fn parse(filename: &str) -> Nav {
