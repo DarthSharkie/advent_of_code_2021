@@ -1,4 +1,5 @@
 use std::fs;
+use std::time::Instant;
 use std::collections::VecDeque;
 use std::collections::HashSet;
 
@@ -29,7 +30,7 @@ impl Octopi for Map {
             for dy in 0..=2 {
                 if dx == 1 && dy == 1 { continue; }
                 if x + dx > 0 && x + dx <= self.len() && y + dy > 0 && y + dy <= self[0].len() {
-                    self[x+dx-1][y+dy-1] = u8::min(self[x+dx-1][y+dy-1] + 1u8, 10);
+                    self[x+dx-1][y+dy-1] += 1;
                     adjacent.push((x+dx-1, y+dy-1));
                 }
             }
@@ -53,7 +54,7 @@ impl Octopi for Map {
             let adjacent: Vec<(usize, usize)> = self.absorb(x, y);
             adjacent
                 .iter()
-                .filter(|&(x, y)| !flashed.contains(&(*x, *y)) && self[*x][*y] == 10)
+                .filter(|&(x, y)| !flashed.contains(&(*x, *y)) && self[*x][*y] >= 10)
                 .for_each(|&(x, y)| if !to_flash.contains(&(x, y)) { to_flash.push_back((x, y)) });
             flashed.insert((x, y));
         }
@@ -63,7 +64,7 @@ impl Octopi for Map {
     fn reset(&mut self) {
         for x in 0..self.len() {
             for y in 0..self[0].len() {
-                if self[x][y] == 10 {
+                if self[x][y] >= 10 {
                     self[x][y] = 0;
                 }
             }
@@ -83,8 +84,11 @@ impl Octopi for Map {
 
 
 fn main() {
+    let start = Instant::now();
     println!("Part 1: {}", part1(&mut parse("input11.txt"))); // 290691
     println!("Part 2: {}", part2(&mut parse("input11.txt"))); // 2768166558
+    let elapsed = start.elapsed();
+    println!("Elapsed: {}µs", elapsed.as_micros());
 }
 
 fn parse(filename: &str) -> Map {
