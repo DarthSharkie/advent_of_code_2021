@@ -6,17 +6,17 @@ use std::fmt::Display;
 type Map = Vec<Vec<u8>>;
 
 trait Octopi {
-	fn increment(&mut self);
+    fn increment(&mut self);
 
     fn absorb(&mut self, x: usize, y: usize) -> Vec<(usize, usize)>;
-	fn flash(&mut self) -> usize;
+    fn flash(&mut self) -> usize;
 
-	fn reset(&mut self);
+    fn reset(&mut self);
     fn print(&self);
 }
 
 impl Octopi for Map { 
-	fn increment(&mut self) {
+    fn increment(&mut self) {
         for x in 0..self.len() {
             for y in 0..self[0].len() {
                 self[x][y] += 1;
@@ -38,12 +38,12 @@ impl Octopi for Map {
         adjacent
     }
 
-	fn flash(&mut self) -> usize {
+    fn flash(&mut self) -> usize {
         let mut to_flash = VecDeque::new();
         let mut flashed = HashSet::new();
         for x in 0..self.len() {
             for y in 0..self[0].len() {
-		        // For each adjacent (incl diagonal), increase energy levels, goto 2
+                // For each adjacent (incl diagonal), increase energy levels, goto 2
                 if self[x][y] > 9 {
                     to_flash.push_back((x, y));
                 }
@@ -58,10 +58,10 @@ impl Octopi for Map {
                 .for_each(|&(x, y)| if !to_flash.contains(&(x, y)) { to_flash.push_back((x, y)) });
             flashed.insert((x, y));
         }
-		flashed.len()
-	}
+        flashed.len()
+    }
 
-	fn reset(&mut self) {
+    fn reset(&mut self) {
         for x in 0..self.len() {
             for y in 0..self[0].len() {
                 if self[x][y] == 10 {
@@ -91,29 +91,44 @@ fn main() {
 fn parse(filename: &str) -> Map {
     let contents = fs::read_to_string(filename).expect("Error reading file!");
     contents.trim().lines().map(|s| {
-		s.bytes().map(|b| b - b'0').collect()
+        s.bytes().map(|b| b - b'0').collect()
     }).collect()
 }
 
 fn part1(map: &mut Map) -> usize {
     let mut flashes: usize = 0;
     for _step in 0..100 {
-        println!("Step {}", _step);
-        map.print();
-    	// 1. Increase energy levels
+        // println!("Step {}", _step);
+        // map.print();
+        // 1. Increase energy levels
         map.increment();
         // 2. Flash all 9s
         flashes += map.flash();
-    	// 3. Reset all 9s to 0
+        // 3. Reset all 9s to 0
         map.reset();
-        println!("Flashes: {}", flashes);
+        // println!("Flashes: {}", flashes);
     }
-    map.print();
-	flashes
+    // map.print();
+    flashes
 }
 
 fn part2(map: &mut Map) -> usize {
-	0
+    let mut flashes: usize = 0;
+    let mut step: usize = 0;
+    while flashes != map.len() * map[0].len() {
+        // println!("Step {}", step);
+        // map.print();
+        // 1. Increase energy levels
+        map.increment();
+        // 2. Flash all 9s
+        flashes = map.flash();
+        // 3. Reset all 9s to 0
+        map.reset();
+        // println!("Flashes: {}", flashes);
+        step += 1;
+    }
+    // map.print();
+    step
 }
 
 #[test]
@@ -123,5 +138,5 @@ fn test_part1() {
 
 #[test]
 fn test_part2() {
-    assert_eq!(part2(&mut parse("sample.txt")), 288957);
+    assert_eq!(part2(&mut parse("sample.txt")), 195);
 }
