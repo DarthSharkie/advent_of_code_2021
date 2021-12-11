@@ -1,7 +1,6 @@
 use std::fs;
 use std::collections::VecDeque;
 use std::collections::HashSet;
-use std::fmt::Display;
 
 type Map = Vec<Vec<u8>>;
 
@@ -76,9 +75,9 @@ impl Octopi for Map {
             for y in 0..self[0].len() {
                 print!("{:x}", self[x][y]);
             }
-            println!("");
+            println!();
         }
-        println!("");
+        println!();
     }
 }
 
