@@ -45,13 +45,15 @@ fn parse(filename: &str) -> (HashSet<(usize, usize)>, Vec<Fold>) {
     let mut point_set: HashSet<(usize, usize)> = HashSet::new();
     content_iter.next().unwrap().lines().for_each(|s| {
         let (x, y) = s.split_once(',').unwrap();
-        point_set.insert((usize::from_str_radix(x, 10).unwrap(), usize::from_str_radix(y, 10).unwrap()));
+        point_set.insert((x.parse::<usize>().unwrap(), y.parse::<usize>().unwrap()));
     });
     let folds = content_iter.next().unwrap().lines().map(|s| {
-        let (axis, position) = s.split_whitespace().skip(2).next().unwrap().split_once('=').unwrap();
+        let (axis, position) = s.split_whitespace().nth(2).unwrap().split_once('=').unwrap();
+        let position = position.parse::<usize>().unwrap();
+
         match axis {
-            "x" => Fold::Vertical(usize::from_str_radix(position, 10).unwrap()),
-            "y" => Fold::Horizontal(usize::from_str_radix(position, 10).unwrap()),
+            "x" => Fold::Vertical(position),
+            "y" => Fold::Horizontal(position),
             _ => panic!("Bad axis!"),
         }
     }).collect();
