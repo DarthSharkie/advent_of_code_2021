@@ -18,14 +18,12 @@ impl Fold {
                 Fold::Horizontal(axis) => if y > axis { (*x, 2*axis - y) } else { (*x, *y) },
                 Fold::Vertical(axis) => if x > axis { (2*axis - x, *y) } else { (*x, *y) },
             };
-            println!("Old: {:?}, New: {:?}", point, new_point);
             new_points.insert(new_point);
         }
         // Have to insert here to avoid a mutable use of points
         for new_point in new_points.iter() {
             points.insert(*new_point);
         }
-        println!("New Points: {:?}", new_points);
         points.retain(|point| new_points.contains(point));
     }
 }
@@ -63,14 +61,13 @@ fn parse(filename: &str) -> (HashSet<(usize, usize)>, Vec<Fold>) {
 fn part1(system: &(HashSet<(usize, usize)>, Vec<Fold>)) -> usize {
     let (orig_points, folds) = system;
     let mut points = orig_points.clone();
-    println!("Points: {:?}", points);
+
     for fold in folds.iter().take(1) {
         match fold {
             Fold::Horizontal(axis) => println!("Horizontal at y={}", axis),
             Fold::Vertical(axis) => println!("Vertical at x={}", axis),
         };
         fold.fold(&mut points);
-        println!("Points: {:?}", points);
     }
     points.len()
 }
@@ -78,14 +75,13 @@ fn part1(system: &(HashSet<(usize, usize)>, Vec<Fold>)) -> usize {
 fn part2(system: &(HashSet<(usize, usize)>, Vec<Fold>)) -> usize {
     let (orig_points, folds) = system;
     let mut points = orig_points.clone();
-    println!("Points: {:?}", points);
+
     for fold in folds {
         match fold {
             Fold::Horizontal(axis) => println!("Horizontal at y={}", axis),
             Fold::Vertical(axis) => println!("Vertical at x={}", axis),
         };
         fold.fold(&mut points);
-        println!("Points: {:?}", points);
     }
 
     let (mx, my) = points.iter().fold((0,0), |(mx, my), &(x, y)| (usize::max(mx, x), usize::max(my, y)));
