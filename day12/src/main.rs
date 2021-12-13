@@ -45,13 +45,17 @@ impl System {
                 routes += 1;
             } else {
                 for possible in self.paths.get(cave).unwrap() {
-                    if possible == end {
-                    } else if let Some('a'..='z') = possible.chars().next() {
-                        if !can_visit(&stop_counts, &possible) {
-                            continue;
-                        }
+                    match &possible[..] {
+                        "start" => (),
+                        "end" => to_try.push((possible, depth + 1)),
+                        _ => match possible.chars().next() {
+                            Some('A'..='Z') => to_try.push((possible, depth + 1)),
+                            Some('a'..='z') => if can_visit(&stop_counts, &possible) {
+                                to_try.push((possible, depth + 1))
+                            },
+                            _ => panic!("Not a valid cave!"),
+                        },
                     }
-                    to_try.push((possible, depth + 1));
                 }
             }
             depth += 1;
