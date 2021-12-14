@@ -47,14 +47,14 @@ fn splice(pair: [u8; 2], replacements: &Replacements, memos: &mut Memos, iterati
             *counts.entry(pair[1]).or_insert(0) += 1;
         } else {
             // pair[0] + new_byte
-            let count1 = splice(first_pair, &replacements, memos, iterations - 1);
+            let count1 = splice(first_pair, replacements, memos, iterations - 1);
             count1.iter().for_each(|(&byte, count)| *counts.entry(byte).or_insert(0) += count);
 
             // New byte will be counted in both recursive paths, so remove it here
             *counts.entry(*new_byte).or_insert(0) -= 1;
 
             // expanded + pair[1]
-            let count2 = splice(second_pair, &replacements, memos, iterations - 1);
+            let count2 = splice(second_pair, replacements, memos, iterations - 1);
             count2.iter().for_each(|(&byte, count)| *counts.entry(byte).or_insert(0) += count);
         }
         // Create memo
@@ -69,13 +69,13 @@ fn part1(system: &(String, Replacements)) -> usize {
     expand(polymer, replacements, 10)
 }
 
-fn expand(polymer: &String, replacements: &Replacements, iterations: usize) -> usize {
+fn expand(polymer: &str, replacements: &Replacements, iterations: usize) -> usize {
     let mut counts = Counts::new();
     let mut memos = Memos::new();
 
     let bytes = polymer.as_bytes();
     for i in 0..polymer.len() - 1 {
-        let pair_counts = splice([bytes[i], bytes[i+1]], &replacements, &mut memos, iterations);
+        let pair_counts = splice([bytes[i], bytes[i+1]], replacements, &mut memos, iterations);
         pair_counts.iter().for_each(|(&byte, count)| *counts.entry(byte).or_insert(0) += count);
         if i > 0 {
             *counts.entry(bytes[i]).or_insert(0) -= 1;
