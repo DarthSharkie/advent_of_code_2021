@@ -8,7 +8,7 @@ type Memos = HashMap<([u8; 2], usize), Counts>;
 
 fn main() {
     let start = Instant::now();
-    println!("Part 1: {}", part1(&parse("input14.txt"))); // 4413
+    println!("Part 1: {}", part1(&parse("input14.txt"))); // 2321
     println!("Part 2: {}", part2(&parse("input14.txt"))); // 118803
     let elapsed = start.elapsed();
     println!("Elapsed: {}µs", elapsed.as_micros());
@@ -39,10 +39,9 @@ fn splice(pair: [u8; 2], replacements: &Replacements, memos: &mut Memos, iterati
         let second_pair = [*new_byte, pair[1]];
 
         let mut counts = Counts::new();
-        // Insert counts
-
         
         if iterations == 1 {
+            // Base case
             *counts.entry(pair[0]).or_insert(0) += 1;
             *counts.entry(*new_byte).or_insert(0) += 1;
             *counts.entry(pair[1]).or_insert(0) += 1;
@@ -51,7 +50,7 @@ fn splice(pair: [u8; 2], replacements: &Replacements, memos: &mut Memos, iterati
             let count1 = splice(first_pair, &replacements, memos, iterations - 1);
             count1.iter().for_each(|(&byte, count)| *counts.entry(byte).or_insert(0) += count);
 
-            // New byte will be double-counted
+            // New byte will be counted in both recursive paths, so remove it here
             *counts.entry(*new_byte).or_insert(0) -= 1;
 
             // expanded + pair[1]
@@ -60,6 +59,7 @@ fn splice(pair: [u8; 2], replacements: &Replacements, memos: &mut Memos, iterati
         }
         // Create memo
         memos.insert((pair, iterations), counts.clone());
+        //println!("Returning from ({:?}, {}) = {:?}", pair, iterations, counts);
         counts
     }
 }
@@ -77,6 +77,9 @@ fn expand(polymer: &String, replacements: &Replacements, iterations: usize) -> u
     for i in 0..polymer.len() - 1 {
         let pair_counts = splice([bytes[i], bytes[i+1]], &replacements, &mut memos, iterations);
         pair_counts.iter().for_each(|(&byte, count)| *counts.entry(byte).or_insert(0) += count);
+        if i > 0 {
+            *counts.entry(bytes[i]).or_insert(0) -= 1;
+        }
     }
 
     println!("Counts: {:?}", counts);
