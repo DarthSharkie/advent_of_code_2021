@@ -2,7 +2,9 @@ use std::fs;
 use std::time::Instant;
 use std::collections::HashMap;
 
-type Replacements = HashMap<[u8; 2], [u8; 2]>;
+type Replacements = HashMap<[u8; 2], u8>;
+type Counts = HashMap<u8, usize>;
+type Memos = HashMap<([u8; 2], usize), Counts>; 
 
 fn main() {
     let start = Instant::now();
@@ -21,48 +23,72 @@ fn parse(filename: &str) -> (String, Replacements) {
     content_iter.next().unwrap().lines().for_each(|s| {
         let (pair, new) = s.split_once(" -> ").unwrap();
         let pair = pair.as_bytes();
-        replacements.insert([pair[0], pair[1]], [pair[0], new.as_bytes()[0]]);
+        replacements.insert([pair[0], pair[1]], new.as_bytes()[0]);
     });
     (template, replacements)
 }
 
-fn splice(polymer: &String, replacements: &Replacements) -> String {
-    let mut pair: [u8; 2] = [0; 2];
-    let bytes = polymer.as_bytes();
-    let pair_count = polymer.len() - 1;
-    let mut new_bytes = Vec::new();
+fn splice(pair: [u8; 2], replacements: &Replacements, memos: &mut Memos, iterations: usize) -> Counts {
 
-    for i in 0..pair_count {
-        pair[0] = bytes[i];
-        pair[1] = bytes[i+1];
-        let expanded = replacements.get(&pair).unwrap();
-        new_bytes.push(expanded[0]);
-        new_bytes.push(expanded[1]);
+    // if we've see the pair and iteration count before, short-cut
+    if let Some(memo) = memos.get(&(pair, iterations)) {
+        memo.clone()
+    } else {
+        let new_byte = replacements.get(&pair).unwrap();
+        let first_pair = [pair[0], *new_byte];
+        let second_pair = [*new_byte, pair[1]];
+
+        let mut counts = Counts::new();
+        // Insert counts
+
+        
+        if iterations == 1 {
+            *counts.entry(pair[0]).or_insert(0) += 1;
+            *counts.entry(*new_byte).or_insert(0) += 1;
+            *counts.entry(pair[1]).or_insert(0) += 1;
+        } else {
+            // pair[0] + new_byte
+            let count1 = splice(first_pair, &replacements, memos, iterations - 1);
+            count1.iter().for_each(|(&byte, count)| *counts.entry(byte).or_insert(0) += count);
+
+            // New byte will be double-counted
+            *counts.entry(*new_byte).or_insert(0) -= 1;
+
+            // expanded + pair[1]
+            let count2 = splice(second_pair, &replacements, memos, iterations - 1);
+            count2.iter().for_each(|(&byte, count)| *counts.entry(byte).or_insert(0) += count);
+        }
+        // Create memo
+        memos.insert((pair, iterations), counts.clone());
+        counts
     }
-    new_bytes.push(bytes[pair_count]);
-    String::from_utf8(new_bytes).unwrap()
 }
 
 fn part1(system: &(String, Replacements)) -> usize {
-    let (input, replacements) = system;
-    let mut polymer = input.to_string();
+    let (polymer, replacements) = system;
+    expand(polymer, replacements, 10)
+}
 
-    for i in 0..10 {
-        println!("Polymer: {}", polymer);
-        polymer = splice(&polymer, &replacements);
+fn expand(polymer: &String, replacements: &Replacements, iterations: usize) -> usize {
+    let mut counts = Counts::new();
+    let mut memos = Memos::new();
+
+    let bytes = polymer.as_bytes();
+    for i in 0..polymer.len() - 1 {
+        let pair_counts = splice([bytes[i], bytes[i+1]], &replacements, &mut memos, iterations);
+        pair_counts.iter().for_each(|(&byte, count)| *counts.entry(byte).or_insert(0) += count);
     }
 
-    let mut counts = HashMap::new();
-    for byte in polymer.bytes() {
-        *counts.entry(byte).or_insert(0) += 1;
-    }
+    println!("Counts: {:?}", counts);
+
     let min = counts.values().min().unwrap_or(&0);
     let max = counts.values().max().unwrap_or(&0);
     max - min
 }
 
 fn part2(system: &(String, Replacements)) -> usize { 
-    0
+    let (polymer, replacements) = system;
+    expand(polymer, replacements, 40)
 }
 
 
@@ -73,5 +99,5 @@ fn test_part1a() {
 
 #[test]
 fn test_part2a() {
-    assert_eq!(part2(&parse("sample.txt")), 16);
+    assert_eq!(part2(&parse("sample.txt")), 2188189693529);
 }
