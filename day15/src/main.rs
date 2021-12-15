@@ -4,7 +4,7 @@ use std::time::Instant;
 
 type Map = Vec<Vec<usize>>;
 
-#[derive(Copy,Clone,Debug,Eq,Hash)]
+#[derive(Copy,Clone,Debug,Eq)]
 struct Point {
     x: usize,
     y: usize,
@@ -44,39 +44,31 @@ fn main() {
 
 fn parse(filename: &str) -> Map {
     let contents = fs::read_to_string(filename).expect("Error reading file!");
-    println!("Parsing");
     contents.lines().map(|s| {
         s.bytes().map(|b| b - b'0').map(usize::from).collect()
     }).collect()
 }
 
 fn find_route(map: &Map, start: &Point, end: &Point) -> usize {
+    // Use bool matrix as "set" membership, since I don't quite get BinaryHeap and Reverse, yet
     let mut marked: Vec<Vec<bool>> = vec![vec![false; map.len()]; map.len()];
     let mut distances: Vec<Vec<usize>> = vec![vec![usize::MAX; map.len()]; map.len()];
     let mut prev: Vec<Vec<Option<Point>>> = vec![vec![None; map.len()]; map.len()];
     let mut heap: Vec<Point> = Vec::new();
-
-    /*for y in 0..map.len() {
-        for x in 0..map.len() {
-            heap.push(Point { x, y });
-        }
-    }*/
 
     // Starting point
     distances[0][0] = 0;
     heap.push(*start);
 
     while !heap.is_empty() {
-        //println!("Heap: {:?}", heap);
         // Sort descending so we can pop off the end (should be faster than remove(0))
+        // Given the frequency of distances and short edge weights, could Dial's algorithm help?
         heap.sort_unstable_by(|a, b| distances[b.y][b.x].cmp(&distances[a.y][a.x]));
 
         let nearest = heap.pop().unwrap();
-        //println!("Checking {:?}", nearest);
         if nearest == *end {
             break;
         }
-        // Use bool matrix as "set" membership
         marked[nearest.y][nearest.x] = true;
 
         let mut neighbors = Vec::new();
@@ -86,6 +78,8 @@ fn find_route(map: &Map, start: &Point, end: &Point) -> usize {
         if 0 < nearest.y { neighbors.push(nearest.up()); }
 
         for neighbor in neighbors {
+            // Expand the frontier (a la 'uniform cost search', a Dijkstra optimization for large
+            // graphs)
             if !marked[neighbor.y][neighbor.x] && !heap.contains(&neighbor) {
                 heap.push(neighbor);
                 let risk = distances[nearest.y][nearest.x] + map[neighbor.y][neighbor.x];
@@ -96,19 +90,11 @@ fn find_route(map: &Map, start: &Point, end: &Point) -> usize {
             }
         }
     }
-    /*println!("Part 1");
-    for row in &distances {
-        println!("{:?}", row);
-    }*/
     distances[end.y][end.x]
 }
 
 
 fn part1(map: &Map) -> usize {
-    println!("Part 1");
-    /*for row in map {
-        println!("{:?}", row);
-    }*/
     find_route(map, &Point { x: 0, y: 0 }, &Point { x: map.len() - 1, y: map.len() - 1 })
 }
 
@@ -126,9 +112,6 @@ fn part2(map: &Map) -> usize {
                 }
             }
         }
-    }
-    for row in &big {
-        println!("{:?}", row);
     }
     find_route(&big, &Point { x: 0, y: 0 }, &Point { x: big.len() - 1, y: big.len() - 1 })
 }
