@@ -12,6 +12,13 @@ struct Packet {
     subpackets: Vec<Packet>,
 }
 
+impl Packet {
+    fn version_sum(&self) -> usize {
+        self.subpackets.iter().map(Self::version_sum).sum::<usize>() + self.version as usize
+    }
+}
+
+
 fn main() {
     let start = Instant::now();
     let bits = parse("input16.txt");
@@ -25,11 +32,24 @@ fn parse(filename: &str) -> String {
     fs::read_to_string(filename).expect("Error reading file!")
 }
 
-fn get_packets(bits: &str) -> (Packet, usize) {
-    let bits: String = bits.chars().map(|c| match c {
+fn get_packets(hex: &str) -> Packet {
+    println!("Hex: {}", hex);
+    let bits: String = hex.chars().map(|c| match c {
         '0'..='9' | 'A'..='F' => format!("{:04b}", u8::from_str_radix(&c.to_string(), 16).unwrap()),
         _ => "".to_string(),
     }).collect();
+
+    let (packet, _) = get_packets_bits(&bits);
+    packet.unwrap()
+}
+
+fn get_packets_bits(bits: &str) -> (Option<Packet>, usize) {
+    println!("Bits: {}", bits);
+
+    if bits.len() < 6 {
+        println!("Too few bits remaining: {}", bits.len());
+        return (None, 0);
+    }
 
     let mut i: usize = 0;
     let starting_bit = i;
@@ -61,23 +81,44 @@ fn get_packets(bits: &str) -> (Packet, usize) {
             println!("Literal: {:?}", literal);
         },
         _ => {
+            println!("Operator Packet");
             let length_type_id = &bits[i..i+1];
             i += 1;
 
             if length_type_id == "0" {
-                let subpacket_bit_length = from_binary(&bits[i..i+15]);
+                println!("Bit Length modifier");
+                let mut subpackets_bit_length = from_binary(&bits[i..i+15]);
                 i += 15;
-
-
-
+                while subpackets_bit_length > 0 {
+                    match get_packets_bits(&bits[i..i+subpackets_bit_length]) {
+                        (Some(subpacket), subpacket_bits_used) => {
+                            subpackets.push(subpacket);
+                            i += subpacket_bits_used;
+                            subpackets_bit_length -= subpacket_bits_used;
+                        },
+                        (None, _) => (),
+                    }
+                }
             } else {
-                let subpacket_count = &bits[i..i+11];
+                println!("Packet count modifier");
+                let mut subpacket_count = from_binary(&bits[i..i+11]);
                 i += 11;
+                while subpacket_count > 0 {
+                    match get_packets_bits(&bits[i..]) {
+                        (Some(subpacket), subpacket_bits_used) => {
+                            subpackets.push(subpacket);
+                            i += subpacket_bits_used;
+                            subpacket_count -= 1;
+                        },
+                        (None, _) => (),
+                    }
+                }
             }
         },
     }
+    println!();
 
-    let packet = Packet {version, type_id, literal, subpackets};
+    let packet = Some(Packet {version, type_id, literal, subpackets});
     let bits_used = i - starting_bit;
     (packet, bits_used)
 }
@@ -91,7 +132,7 @@ fn from_binary(s: &str) -> usize {
 }
 
 fn part1(hex: &str) -> usize {
-    let (packet, _) = get_packets(hex);
+    let packet = get_packets(hex);
     packet.version as usize
 }
 
@@ -108,6 +149,11 @@ fn test_part1a() {
 #[test]
 fn test_part1b() {
     assert_eq!(part1(&String::from("38006F45291200").as_str()), 1);
+}
+
+#[test]
+fn test_part1c() {
+    assert_eq!(part1(&String::from("8A004A801A8002F478").as_str()), 16);
 }
 
 #[test]
