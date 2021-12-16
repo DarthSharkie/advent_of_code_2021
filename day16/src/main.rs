@@ -2,9 +2,6 @@ use std::fs;
 use std::time::Instant;
 
 
-struct Transmission {
-}
-
 struct Packet {
     version: u8,
     type_id: u8,
@@ -17,8 +14,21 @@ impl Packet {
         println!("My version: {}", self.version);
         self.subpackets.iter().map(Self::version_sum).sum::<usize>() + self.version as usize
     }
-}
 
+    fn evaluate(&self) -> usize {
+        match self.type_id {
+            0 => self.subpackets.iter().map(Self::evaluate).sum(),
+            1 => self.subpackets.iter().map(Self::evaluate).product(),
+            2 => self.subpackets.iter().map(Self::evaluate).min().unwrap(),
+            3 => self.subpackets.iter().map(Self::evaluate).max().unwrap(),
+            4 => self.literal.unwrap(),
+            5 => if self.subpackets[0].evaluate() > self.subpackets[1].evaluate() { 1 } else { 0 },
+            6 => if self.subpackets[0].evaluate() < self.subpackets[1].evaluate() { 1 } else { 0 },
+            7 => if self.subpackets[0].evaluate() == self.subpackets[1].evaluate() { 1 } else { 0 },
+            _ => 0,
+        }
+    }
+}
 
 fn main() {
     let start = Instant::now();
@@ -138,7 +148,8 @@ fn part1(hex: &str) -> usize {
 }
 
 fn part2(hex: &str) -> usize {
-    0
+    let packet = get_packets(hex);
+    packet.evaluate()
 }
 
 
@@ -154,5 +165,12 @@ fn test_part1a() {
 
 #[test]
 fn test_part2a() {
-    assert_eq!(part2(&parse("sample.txt")), 315);
+    assert_eq!(part2(&String::from("C200B40A82")), 3); // 1 + 2
+    assert_eq!(part2(&String::from("04005AC33890")), 54);  // 6 * 9
+    assert_eq!(part2(&String::from("880086C3E88112")), 7);  // min(7, 8, 9)
+    assert_eq!(part2(&String::from("CE00C43D881120")), 9);  // max(7, 8, 9)
+    assert_eq!(part2(&String::from("D8005AC2A8F0")), 1);    // 5 < 15
+    assert_eq!(part2(&String::from("F600BC2D8F")), 0);      // 5 > 15
+    assert_eq!(part2(&String::from("9C005AC2F8F0")), 0);    // 5 != 15
+    assert_eq!(part2(&String::from("9C0141080250320F1802104A08")), 1); // 1 + 3 = 2 * 2
 }
