@@ -33,8 +33,8 @@ impl Packet {
 fn main() {
     let start = Instant::now();
     let bits = parse("input16.txt");
-    println!("Part 1: {}", part1(&bits)); // 2321
-    println!("Part 2: {}", part2(&bits)); // 118803
+    println!("Part 1: {}", part1(&bits)); // 936
+    println!("Part 2: {}", part2(&bits)); // 6802496672062
     let elapsed = start.elapsed();
     println!("Elapsed: {}µs", elapsed.as_micros());
 }
