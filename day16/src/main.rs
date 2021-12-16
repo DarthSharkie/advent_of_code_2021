@@ -14,6 +14,7 @@ struct Packet {
 
 impl Packet {
     fn version_sum(&self) -> usize {
+        println!("My version: {}", self.version);
         self.subpackets.iter().map(Self::version_sum).sum::<usize>() + self.version as usize
     }
 }
@@ -133,7 +134,7 @@ fn from_binary(s: &str) -> usize {
 
 fn part1(hex: &str) -> usize {
     let packet = get_packets(hex);
-    packet.version as usize
+    packet.version_sum()
 }
 
 fn part2(hex: &str) -> usize {
@@ -144,16 +145,11 @@ fn part2(hex: &str) -> usize {
 #[test]
 fn test_part1a() {
     assert_eq!(part1(&String::from("D2FE28").as_str()), 6);
-}
-
-#[test]
-fn test_part1b() {
-    assert_eq!(part1(&String::from("38006F45291200").as_str()), 1);
-}
-
-#[test]
-fn test_part1c() {
+    assert_eq!(part1(&String::from("38006F45291200").as_str()), 9);
     assert_eq!(part1(&String::from("8A004A801A8002F478").as_str()), 16);
+    assert_eq!(part1(&String::from("620080001611562C8802118E34").as_str()), 12);
+    assert_eq!(part1(&String::from("C0015000016115A2E0802F182340").as_str()), 23);
+    assert_eq!(part1(&String::from("A0016C880162017C3686B18A3D4780").as_str()), 31);
 }
 
 #[test]
