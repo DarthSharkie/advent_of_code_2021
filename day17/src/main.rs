@@ -62,11 +62,11 @@ fn part2(x1: i32, y1: i32, x2: i32, y2: i32) -> usize {
 
             let mut step = 0;
 
-            while y > i32::min(y1, y2) {
+            while y > ymin {
                 x += vx;
                 y += vy;
                 step += 1;
-                if i32::min(x1, x2) <= x && x <= i32::max(x1, x2) && i32::min(y1, y2) <= y && y <= i32::max(y1, y2) {
+                if xmin <= x && x <= xmax && ymin <= y && y <= ymax {
                     //println!("Solution v0 = ({}, {}) after step {}", vx0, vy0, step);
                     solutions += 1;
                     break;
